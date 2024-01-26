@@ -115,9 +115,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         let keys = keyscan::scan()?;
         let pressure = sensor.read()?;
         let vol = max(0, pressure);
+        const SYNTH_CC_VOLUME: i32 = 11;
         const MIDI_CC_VOLUME: i32 = 2;
         if last_vol != vol {
-            synth.cc(0, MIDI_CC_VOLUME, vol);
+            synth.cc(0, SYNTH_CC_VOLUME, vol);
             #[cfg(feature = "midi")]
             midi_out.cc(MIDI_CC_VOLUME, vol);
             last_vol = vol;
@@ -156,7 +157,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 };
                 if vol > 0 {
                     if last_note > 0 {
-                        synth.cc(0, MIDI_CC_VOLUME, 0);
+                        synth.cc(0, SYNTH_CC_VOLUME, 0);
                         #[cfg(feature = "midi")]
                         midi_out.cc(MIDI_CC_VOLUME, 0);
                         synth.noteoff(0, last_note);
@@ -164,7 +165,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         midi_out.noteoff(last_note);
                         #[cfg(feature = "instrumentation")]
                         noteon_pin.set_low();
-                        synth.cc(0, MIDI_CC_VOLUME, vol);
+                        synth.cc(0, SYNTH_CC_VOLUME, vol);
                         #[cfg(feature = "midi")]
                         midi_out.cc(MIDI_CC_VOLUME, vol);
                     }

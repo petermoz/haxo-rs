@@ -14,7 +14,7 @@ enum CommandKeys {
     Unmapped,
 }
 
-const MIDI_CC_VOLUME: i32 = 7;
+const MIDI_CC_VOLUME: i32 = 11;
 
 fn key2cmdkey(key: u32) -> CommandKeys {
     match key {
