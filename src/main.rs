@@ -115,7 +115,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let keys = keyscan::scan()?;
         let pressure = sensor.read()?;
         let vol = max(0, pressure);
-        const MIDI_CC_VOLUME: i32 = 7;
+        const MIDI_CC_VOLUME: i32 = 2;
         if last_vol != vol {
             synth.cc(0, MIDI_CC_VOLUME, vol);
             #[cfg(feature = "midi")]

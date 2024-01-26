@@ -87,7 +87,7 @@ pub fn try_init(
 }
 
 pub fn beep(synth: &synth::Synth, note: i32, vol: i32) {
-    const MIDI_CC_VOLUME: i32 = 7;
+    const MIDI_CC_VOLUME: i32 = 2;
     synth.noteon(0, note, vol);
     synth.cc(0, MIDI_CC_VOLUME, vol);
     thread::sleep(Duration::from_millis(100));
