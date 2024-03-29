@@ -14,6 +14,6 @@ aptsources=Raspbian
 [Raspbian]
 # Required packages for our build
 packages=libasound2-dev libdbus-1-dev libssl-dev libc6-dev libfluidsynth-dev
-source=http://raspbian.raspberrypi.org/raspbian/
+source=http://raspbian.raspberrypi.com/raspbian/
 # Distribution version name
-suite=bullseye
+suite=bookworm
