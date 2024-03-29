@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 rust:1.75-bullseye
+FROM --platform=linux/amd64 rust:1.75-bookworm
 
 WORKDIR /setup
 
@@ -10,9 +10,9 @@ RUN mkdir /sysroot/
 # Install raspberry pi keyring.
 # We install it directly into the sysroot so that multistrap can use it.
 RUN mkdir -p /sysroot/etc/apt/trusted.gpg.d
-RUN curl -sL http://archive.raspbian.org/raspbian.public.key | gpg --import - \
+RUN curl -sL http://raspbian.raspberrypi.com/raspbian.public.key | gpg --import - \
   && gpg --export 9165938D90FDDD2E \
-    > /sysroot/etc/apt/trusted.gpg.d/raspbian-archive-keyring.gpg
+    > /sysroot/etc/apt/trusted.gpg.d/raspbian-keyring.gpg
 
 # Setup the sysroot.
 COPY multistrap-config .
