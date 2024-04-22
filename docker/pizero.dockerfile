@@ -29,6 +29,8 @@ RUN wget -q -O- https://github.com/tttapa/docker-arm-cross-toolchain/releases/la
 # Add the rust target.
 RUN rustup target add arm-unknown-linux-gnueabihf
 
+RUN cargo install cargo-deb
+
 # Setup compilation environment variables.
 ENV PKG_CONFIG_LIBDIR_arm_unknown_linux_gnueabihf=/sysroot/usr/lib/arm-linux-gnueabihf/pkgconfig
 ENV PKG_CONFIG_SYSROOT_DIR_arm_unknown_linux_gnueabihf=/sysroot/
