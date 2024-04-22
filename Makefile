@@ -1,5 +1,5 @@
 .PHONY: all
-all: binary
+all: deb
 
 .PHONY: libs
 libs:
@@ -11,3 +11,9 @@ binary: libs
 		--target arm-unknown-linux-gnueabihf \
 		--release \
 		--features midi
+
+.PHONY: deb 
+deb: binary
+	cargo deb \
+		--target arm-unknown-linux-gnueabihf \
+		--no-build
