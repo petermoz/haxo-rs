@@ -13,6 +13,13 @@
       cargo build --target arm-unknown-linux-gnueabihf --release --features midi
    ```
 
+- Or, build a deb
+  ```
+  docker run --rm --mount "type=bind,source=$(pwd),target=/haxo" \
+    --mount "type=bind,source=$HOME/.cargo,target=/cargo" pizero:local \
+    cargo deb --target arm-unknown-linux-gnueabihf -- --release --features midi
+  ```
+
 ## References
 - https://capnfabs.net/posts/cross-compiling-rust-apps-linker-shenanigans-multistrap-chroot/
 - https://earthly.dev/blog/cross-compiling-raspberry-pi/
