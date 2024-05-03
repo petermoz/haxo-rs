@@ -44,12 +44,10 @@ pub fn try_init(
 
     let adriver = audio::AudioDriver::new(&mut settings, &mut syn);
 
-    // Use FluidR3_GM.sf2 with multiple instruments for midi file
-    let startup_sf2_filename = "/usr/share/sounds/sf2/FluidR3_GM.sf2";
-    let sf2startup = syn.sfload(startup_sf2_filename, 1);
+    let sf2 = syn.sfload(sf2file, 1);
 
-    if sf2startup == None {
-        warn!("Failed to load sound font file {}", startup_sf2_filename);
+    if sf2 == None {
+        warn!("Failed to load sound font file {}", sf2file);
     }
 
     // Enable polyphony for midi file
@@ -75,11 +73,6 @@ pub fn try_init(
         warn!("Failed to set polyphony to 1");
     }
 
-    let sf2 = syn.sfload(sf2file, 1);
-
-    if sf2 == None {
-        warn!("Failed to load sound font file {}", sf2file);
-    }
     // select bank number
     syn.program_change(0, banknum);
     println!("Synth created");
