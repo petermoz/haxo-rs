@@ -1,0 +1,7 @@
+[target.armv7-unknown-linux-gnueabihf.alsa]
+rustc-link-lib = ["asound"]
+rustc-link-search = ["libs/usr/lib/arm-linux-gnueabihf/"]
+
+[target.arm-unknown-linux-gnueabihf.alsa]
+rustc-link-lib = ["asound"]
+rustc-link-search = ["libs/usr/lib/arm-linux-gnueabihf/"]
