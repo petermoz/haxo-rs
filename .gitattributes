@@ -1,0 +1,11 @@
+# Force LF to keep shell script shebangs working.
+* text=auto eol=lf
+
+*.sh text eol=lf
+
+# Known binary files.
+*.mid binary
+*.mp3 binary
+*.mscz binary
+*.pdf binary
+*.png binary
