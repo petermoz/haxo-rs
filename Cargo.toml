@@ -18,15 +18,13 @@ schedule_recv = "0.1"
 static_assertions = "1.1.0"
 structopt = "0.3.22"
 time = "0.3.1"
+fluidlite = { version = "0.2.1", features = ["builtin"] }
 
 [dev-dependencies]
 test-log = "0.2.12"
 
 [build-dependencies]
 vergen = { version = "8.2.6", features = ["git", "gitcl"] }
-
-[dependencies.fluidsynth]
-git = "https://github.com/scholtzan/rust-fluidsynth"
 
 [features]
 default = []
