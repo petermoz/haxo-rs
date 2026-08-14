@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let opt = Opt::from_args();
     debug!("{:?}", opt);
 
-    let (synth, _settings, _adriver) = synth::try_init(&opt.sf2_file, opt.prog_number);
+    let synth = synth::Synth::try_init(&opt.sf2_file, opt.prog_number)?;
     #[cfg(feature = "midi")]
     let mut midi_out = midi::MidiOut::new()?;
 

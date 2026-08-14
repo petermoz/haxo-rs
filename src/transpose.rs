@@ -1,11 +1,10 @@
 use std::thread;
 use std::time::Duration;
 
-use fluidsynth::synth::Synth;
 use log::info;
 
 use crate::notemap::NoteMap;
-use crate::synth::beep;
+use crate::synth::{beep, Synth};
 
 #[derive(Copy, Clone, PartialEq)]
 enum TransposeCmd {
