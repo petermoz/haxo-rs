@@ -2,12 +2,16 @@ use alsa::{
     pcm::{Access, Format, HwParams, PCM},
     Direction, ValueOr,
 };
-use log::{info, warn};
+use log::{debug, info, warn};
 use std::error::Error;
 use std::sync::mpsc::{self, TryRecvError};
 use std::thread;
 use std::time::Duration;
 use std::{array::TryFromSliceError, convert::TryInto};
+use thread_priority::{
+    set_thread_priority_and_policy, thread_native_id, RealtimeThreadSchedulePolicy, ThreadPriority,
+    ThreadSchedulePolicy,
+};
 
 #[derive(Debug)]
 enum Event {
@@ -22,22 +26,32 @@ pub struct Synth {
     thread: Option<std::thread::JoinHandle<()>>,
 }
 
-const SAMPLE_RATE: u32 = 44100;
+const SAMPLE_RATE: u32 = 48000;
 const CHANNELS: u32 = 2;
-const BUFFER_FRAMES: usize = 64;
+const PERIODS: u32 = 3;
+const PERIOD_SIZE: usize = 64;
 
 fn setup_synth(soundfont: &str) -> Result<fluidlite::Synth, Box<dyn Error>> {
     let settings = fluidlite::Settings::new()?;
     let fs = fluidlite::Synth::new(settings)?;
     fs.sfload(soundfont, true)?;
-
     fs.program_change(0, 65)?;
-
     Ok(fs)
 }
 
 fn run_synth(rx: mpsc::Receiver<Event>, fs: fluidlite::Synth) -> Result<(), Box<dyn Error>> {
     info!("Starting synth thread");
+
+    match set_thread_priority_and_policy(
+        thread_native_id(),
+        ThreadPriority::Crossplatform(99u8.try_into().unwrap()),
+        ThreadSchedulePolicy::Realtime(RealtimeThreadSchedulePolicy::Fifo),
+    ) {
+        Err(e) => {
+            warn!("Setting realtime thread priority failed: {:?}", e);
+        }
+        Ok(_) => todo!(),
+    }
 
     let pcm = PCM::new("default", Direction::Playback, false)?;
     {
@@ -46,16 +60,15 @@ fn run_synth(rx: mpsc::Receiver<Event>, fs: fluidlite::Synth) -> Result<(), Box<
         hwp.set_rate(SAMPLE_RATE, ValueOr::Nearest)?;
         hwp.set_format(Format::s16())?; // interleaved 16-bit signed PCM
         hwp.set_access(Access::RWInterleaved)?;
-        hwp.set_period_size(BUFFER_FRAMES as i64, ValueOr::Nearest)?;
+        hwp.set_periods(PERIODS, ValueOr::Nearest)?;
+        hwp.set_period_size(PERIOD_SIZE as i64, ValueOr::Nearest)?;
         pcm.hw_params(&hwp)?;
     }
     let io = pcm.io_i16()?;
 
-    let mut left = vec![0f32; BUFFER_FRAMES];
-    let mut right = vec![0f32; BUFFER_FRAMES];
-    let mut interleaved = vec![0i16; BUFFER_FRAMES * CHANNELS as usize];
+    let mut buffer = vec![0i16; PERIOD_SIZE * CHANNELS as usize];
 
-    loop {
+    'outer: loop {
         let mut events = 0;
         loop {
             match rx.try_recv() {
@@ -78,20 +91,15 @@ fn run_synth(rx: mpsc::Receiver<Event>, fs: fluidlite::Synth) -> Result<(), Box<
                     fs.cc(0, control.try_into().unwrap(), value.try_into().unwrap())?;
                 }
                 Err(TryRecvError::Empty) => break,
-                Err(TryRecvError::Disconnected) => break,
+                Err(TryRecvError::Disconnected) => break 'outer,
             }
         }
         if events > 0 {
-            info!("handled {events} events");
+            debug!("handled {events} events");
         }
 
-        fs.write((left.as_mut_slice(), right.as_mut_slice()))?;
-        // Convert f32 [-1.0, 1.0] to interleaved i16 for ALSA.
-        for i in 0..BUFFER_FRAMES {
-            interleaved[i * 2] = (left[i].clamp(-1.0, 1.0) * i16::MAX as f32) as i16;
-            interleaved[i * 2 + 1] = (right[i].clamp(-1.0, 1.0) * i16::MAX as f32) as i16;
-        }
-        io.writei(&interleaved)?;
+        fs.write(&mut buffer[..])?;
+        io.writei(&buffer)?;
     }
 
     pcm.drain()?;
@@ -100,7 +108,7 @@ fn run_synth(rx: mpsc::Receiver<Event>, fs: fluidlite::Synth) -> Result<(), Box<
 
 impl Synth {
     pub fn try_init(sf2file: &str, banknum: i32) -> Result<Self, Box<dyn Error>> {
-        let fs = setup_synth("/usr/share/sounds/sf2/TimGM6mb.sf2")?;
+        let fs = setup_synth(sf2file)?;
         let (tx, rx) = mpsc::channel::<Event>();
         let thread = std::thread::spawn(move || {
             run_synth(rx, fs).expect("failed to run synth");
