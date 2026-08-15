@@ -31,11 +31,11 @@ const CHANNELS: u32 = 2;
 const PERIODS: u32 = 3;
 const PERIOD_SIZE: usize = 64;
 
-fn setup_synth(soundfont: &str) -> Result<fluidlite::Synth, Box<dyn Error>> {
+fn setup_synth(soundfont: &str, prog: i32) -> Result<fluidlite::Synth, Box<dyn Error>> {
     let settings = fluidlite::Settings::new()?;
     let fs = fluidlite::Synth::new(settings)?;
     fs.sfload(soundfont, true)?;
-    fs.program_change(0, 65)?;
+    fs.program_change(0, prog as u32)?;
     Ok(fs)
 }
 
@@ -108,7 +108,7 @@ fn run_synth(rx: mpsc::Receiver<Event>, fs: fluidlite::Synth) -> Result<(), Box<
 
 impl Synth {
     pub fn try_init(sf2file: &str, banknum: i32) -> Result<Self, Box<dyn Error>> {
-        let fs = setup_synth(sf2file)?;
+        let fs = setup_synth(sf2file, banknum)?;
         let (tx, rx) = mpsc::channel::<Event>();
         let thread = std::thread::spawn(move || {
             run_synth(rx, fs).expect("failed to run synth");
