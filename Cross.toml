@@ -5,3 +5,6 @@ pre-build = [
   "dpkg --add-architecture $CROSS_DEB_ARCH",
   "apt-get update && apt-get install --assume-yes libasound2-dev:$CROSS_DEB_ARCH",
 ]
+
+[build.env]
+passthrough = [ "VERGEN_GIT_DESCRIBE" ]
