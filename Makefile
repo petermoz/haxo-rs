@@ -6,7 +6,7 @@ all: build deb
 
 .PHONY: build
 build:
-	cross build --release --features midi --target $(TARGET)
+	VERGEN_GIT_DESCRIBE=$(VERGEN_GIT_DESCRIBE) cross build --release --features midi --target $(TARGET)
 
 .PHONY: deb
 deb:
