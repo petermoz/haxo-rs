@@ -47,4 +47,4 @@ systemd-units = [
   { unit-name = "haxo", enable = true },
   { unit-name = "blink-zero", enable = true },
 ]
-depends = ["libasound2", "fluid-soundfont-gm"]
+depends = ["libasound2", "timgm6mb-soundfont", "fluid-soundfont-gm"]
