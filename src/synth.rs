@@ -3,11 +3,11 @@ use alsa::{
     Direction, ValueOr,
 };
 use log::{debug, info, warn};
+use std::convert::TryInto;
 use std::error::Error;
 use std::sync::mpsc::{self, TryRecvError};
 use std::thread;
 use std::time::Duration;
-use std::{array::TryFromSliceError, convert::TryInto};
 use thread_priority::{
     set_thread_priority_and_policy, thread_native_id, RealtimeThreadSchedulePolicy, ThreadPriority,
     ThreadSchedulePolicy,
@@ -42,18 +42,18 @@ fn setup_synth(soundfont: &str, prog: i32) -> Result<fluidlite::Synth, Box<dyn E
 fn run_synth(rx: mpsc::Receiver<Event>, fs: fluidlite::Synth) -> Result<(), Box<dyn Error>> {
     info!("Starting synth thread");
 
-    match set_thread_priority_and_policy(
+    // Attempt to set thread priority, but only warn if not possible.
+    if let Err(e) = set_thread_priority_and_policy(
         thread_native_id(),
         ThreadPriority::Crossplatform(99u8.try_into().unwrap()),
         ThreadSchedulePolicy::Realtime(RealtimeThreadSchedulePolicy::Fifo),
     ) {
-        Err(e) => {
-            warn!("Setting realtime thread priority failed: {:?}", e);
-        }
-        Ok(_) => todo!(),
+        warn!("failed to set realtime thread priority: {:?}", e);
     }
 
-    let pcm = PCM::new("default", Direction::Playback, false)?;
+    let device = crate::alsa::get_device()?;
+
+    let pcm = PCM::new(&device, Direction::Playback, false)?;
     {
         let hwp = HwParams::any(&pcm)?;
         hwp.set_channels(CHANNELS)?;

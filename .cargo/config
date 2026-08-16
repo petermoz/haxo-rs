@@ -1,2 +1,0 @@
-[target.arm-unknown-linux-gnueabihf]
-strip = { path = "/opt/x-tools/armv6-rpi-linux-gnueabihf/bin/armv6-rpi-linux-gnueabihf-strip" }

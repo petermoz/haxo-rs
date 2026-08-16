@@ -2,21 +2,9 @@
 name = "haxo001"
 version = "0.1.0"
 authors = ["Javier Cardona <javier.cardona@gmail.com>"]
+description = "haxophone software"
 edition = "2018"
-
-[package.metadata.deb]
-assets = [
-  ["target/arm-unknown-linux-gnueabihf/release/haxo001", "usr/bin/", "755"],
-  ["scripts/systemd/create_midi_gadget.sh", "usr/bin/", "755"],
-  ["notemap.json", "usr/share/haxo/", "644"],
-  ["midi/startup/Startup_Haxophone.mid", "usr/share/haxo/", "644"],
-]
-maintainer-scripts = "debian/"
-systemd-units = [
-  { unit-name = "haxo", enable = true },
-  { unit-name = "blink-zero", enable = true },
-]
-depends = "libasound2 (>= 1.2.8), libc6 (>= 2.36), libfluidsynth3 (>= 2.3.1)"
+license = "mit"
 
 [dependencies]
 alsa = "0.11.0"
@@ -45,3 +33,18 @@ default = []
 # console is used.
 instrumentation = []
 midi = []
+
+# Configuration for cargo-deb.
+[package.metadata.deb]
+assets = [
+  ["target/release/haxo001", "usr/local/bin/", "755"],
+  ["scripts/systemd/create_midi_gadget.sh", "usr/local/bin/", "755"],
+  ["notemap.json", "usr/share/haxo/", "644"],
+  ["midi/startup/Startup_Haxophone.mid", "usr/share/haxo/", "644"],
+]
+maintainer-scripts = "scripts/systemd"
+systemd-units = [
+  { unit-name = "haxo", enable = true },
+  { unit-name = "blink-zero", enable = true },
+]
+depends = ["libasound2", "fluid-soundfont-gm"]
