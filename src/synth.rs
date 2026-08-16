@@ -2,6 +2,7 @@ use alsa::{
     pcm::{Access, Format, HwParams, PCM},
     Direction, ValueOr,
 };
+use fluidlite::IsSettings;
 use log::{debug, info, warn};
 use std::convert::TryInto;
 use std::error::Error;
@@ -33,6 +34,11 @@ const PERIOD_SIZE: usize = 64;
 
 fn setup_synth(soundfont: &str, prog: i32) -> Result<fluidlite::Synth, Box<dyn Error>> {
     let settings = fluidlite::Settings::new()?;
+    if let Some(sample_rate) = settings.num("synth.sample-rate") {
+        sample_rate.set(SAMPLE_RATE as f64);
+    } else {
+        warn!("failed to set sample rate");
+    }
     let fs = fluidlite::Synth::new(settings)?;
     fs.sfload(soundfont, true)?;
     fs.program_change(0, prog as u32)?;
